@@ -20,12 +20,17 @@ const SignIn = () => {
   const submitHandler = async (data) => {
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/user/sign-in", data);
+      const result = await axios.post("/api/user/sign-in", data);
       toast({
         title: "Login successful",
         status: "success",
       });
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      const user = {
+        name: result.data?.name,
+        email: result.data?.email,
+        token: result.data?.token,
+      };
+      localStorage.setItem("userInfo", JSON.stringify(user));
       navigate("/chats");
     } catch (error) {
       toast({

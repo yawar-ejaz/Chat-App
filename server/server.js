@@ -2,7 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
-
+const sequelize = require('./utils/database');
+const User = require('./models/user');
+const Chat = require('./models/chat');
+const Message = require('./models/message');
 
 
 
@@ -17,10 +20,18 @@ app.use(cors({
 app.use("/api/user/", userRoutes);
 
 
+
+Chat.hasMany(Message);
+Message.belongsTo(Chat);
+Chat.belongsTo(User, { as: "groupAdmin" });
+Message.belongsTo(User, { as: "sender" });
+Message.belongsToMany(User, { as: "users", through: "UserMessage" });
+Chat.belongsToMany(User, { as: "users", through: "UserChat" });
+
 async function startServer() {
     try {
         // await sequelize.sync({force: true});
-        // await sequelize.sync();
+        await sequelize.sync();
         app.listen(port, () => {
             console.log(`Server running on port ${port}...`);
         });

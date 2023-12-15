@@ -6,6 +6,7 @@ import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [show, setShow] = useState(false);
@@ -16,6 +17,7 @@ const SignUp = () => {
   );
 
   const { reset, register, handleSubmit } = useForm();
+  const navigate = useNavigate();
 
   const submitHandler = async (data) => {
     data.pic = pic;
@@ -23,12 +25,17 @@ const SignUp = () => {
 
     setLoading(true);
     try {
-      await axios.post("/api/user/sign-up", data);
+      const result = await axios.post("/api/user/sign-up", data);
       toast({
         title: "Account created successfully",
         status: "success",
       });
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      const user = {
+        name: result.data?.name,
+        email: result.data?.email,
+        token: result.data?.token,
+      };
+      localStorage.setItem("userInfo", JSON.stringify(user));
       navigate("/chats");
     } catch (error) {
       toast({
@@ -52,7 +59,6 @@ const SignUp = () => {
     }
     setLoading(true);
 
-    // console.log(pic);
     if (pic.type === "image/jpeg" || pic.type === "image/png") {
       const data = new FormData();
       data.append("file", pic);
@@ -66,7 +72,6 @@ const SignUp = () => {
         .then((data) => {
           setPic(data.url.toString());
           console.log(data.url.toString());
-          //   console.log(data.url.toString());
           setLoading(false);
         })
         .catch((err) => {
