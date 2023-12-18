@@ -21,10 +21,10 @@ const SignIn = () => {
     setLoading(true);
     try {
       const result = await axios.post("/api/user/sign-in", data);
-      toast({
-        title: "Login successful",
-        status: "success",
-      });
+    //   toast({
+    //     title: "Login successful",
+    //     status: "success",
+    //   });
       const user = {
         name: result.data?.name,
         email: result.data?.email,

@@ -26,10 +26,10 @@ const SignUp = () => {
     setLoading(true);
     try {
       const result = await axios.post("/api/user/sign-up", data);
-      toast({
-        title: "Account created successfully",
-        status: "success",
-      });
+    //   toast({
+    //     title: "Account created successfully",
+    //     status: "success",
+    //   });
       const user = {
         name: result.data?.name,
         email: result.data?.email,

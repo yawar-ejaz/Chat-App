@@ -1,4 +1,5 @@
 const { encrypt, isMatching } = require("../utils/hashing");
+const { Op } = require("sequelize");
 
 const User = require('../models/user');
 const generateToken = require('../utils/generateToken');
@@ -37,7 +38,7 @@ const createUser = async (req, res, next) => {
             message: "Internal server error"
         });
     }
-}
+};
 
 const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
@@ -54,7 +55,7 @@ const loginUser = async (req, res, next) => {
         }
 
         if (await isMatching(password, existingUser.password)) {
-            
+
             return res.status(200).json({
                 success: true,
                 token: generateToken(existingUser._id),
@@ -75,6 +76,37 @@ const loginUser = async (req, res, next) => {
             message: "Internal server error"
         });
     }
-}
+};
 
-module.exports = { createUser, loginUser };
+const findUsersByName = async (req, res, next) => {
+    const name = req.query.search;
+
+    if (!name) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide a name!",
+        });
+    }
+
+    try {
+        const users = await User.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${name}%`,
+                },
+                _id: {
+                    [Op.not]: req.user._id,
+                },
+            },
+            attributes: { exclude: ["password"] },
+        });
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: `Internal server error`
+        });
+    }
+};
+
+module.exports = { createUser, loginUser, findUsersByName };
