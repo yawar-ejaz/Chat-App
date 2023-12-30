@@ -28,6 +28,7 @@ const SignIn = () => {
       const user = {
         name: result.data?.name,
         email: result.data?.email,
+        picture: result.data?.picture,
         token: result.data?.token,
       };
       localStorage.setItem("userInfo", JSON.stringify(user));

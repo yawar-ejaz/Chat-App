@@ -11,28 +11,30 @@ import { useNavigate } from "react-router-dom";
 const SignUp = () => {
   const [show, setShow] = useState(false);
   const toast = useToast();
-  const [loading, setLoading] = useState(false);
-  const [pic, setPic] = useState(
-    `https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg`
-  );
 
   const { reset, register, handleSubmit } = useForm();
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
-    data.pic = pic;
-    //now data consists of name, email, password and pic
+    data.pic = data.pic[0];
+    if (data.pic === undefined) {
+      data.pic = `https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg`;
+    }
+    console.log(data);
 
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("pic", data.pic);
+    console.log(formData);
+
     try {
-      const result = await axios.post("/api/user/sign-up", data);
-    //   toast({
-    //     title: "Account created successfully",
-    //     status: "success",
-    //   });
+      const result = await axios.post("/api/user/sign-up", formData);
       const user = {
         name: result.data?.name,
         email: result.data?.email,
+        picture: result.data?.picture,
         token: result.data?.token,
       };
       localStorage.setItem("userInfo", JSON.stringify(user));
@@ -44,46 +46,6 @@ const SignUp = () => {
         status: "error",
       });
       reset();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const postDetails = (pic) => {
-    if (pic === undefined) {
-      toast({
-        title: "Please Select an Image!",
-        status: "warning",
-      });
-      return;
-    }
-    setLoading(true);
-
-    if (pic.type === "image/jpeg" || pic.type === "image/png") {
-      const data = new FormData();
-      data.append("file", pic);
-      data.append("upload_preset", "chatterbox");
-      data.append("cloud_name", "yawar-ejaz");
-      fetch("https://api.cloudinary.com/v1_1/yawar-ejaz/image/upload", {
-        method: "post",
-        body: data,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setPic(data.url.toString());
-          console.log(data.url.toString());
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-        });
-    } else {
-      toast({
-        title: "Please Select an Image!",
-        status: "warning",
-      });
-      setLoading(false);
     }
   };
 
@@ -125,12 +87,7 @@ const SignUp = () => {
 
         <FormControl id="pic">
           <FormLabel>Upload a profile picture (optional)</FormLabel>
-          <Input
-            type="file"
-            p={1.5}
-            accept="image/*"
-            onChange={(e) => postDetails(e.target.files[0])}
-          />
+          <Input type="file" p={1.5} accept="image/*" {...register(`pic`)} />
         </FormControl>
 
         <Button

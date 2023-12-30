@@ -15,14 +15,6 @@ const Chat = sequelize.define('chat', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
-    // groupAdminId: {
-    //     type: DataTypes.UUID,
-    //     allowNull: true,
-    // },
 });
-
-// // Define associations
-// Chat.belongsToMany(Users, { through: 'ChatUsers', foreignKey: 'chatId' });
-// Users.belongsToMany(Chat, { through: 'ChatUsers', foreignKey: 'userId' });
 
 module.exports = Chat;

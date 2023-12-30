@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ProfileModal from "./ProfileModal";
+import ChatsLoading from "./ChatsLoading";
+import UserListItem from "./UserListItem";
 import { FaSearch } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
@@ -29,36 +31,42 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-  TableContainer,
+  useToast,
 } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/layout";
 
 const SideDrawer = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingChat, setLoadingChat] = useState(false);
   const [foundUsers, setFoundUsers] = useState([]);
+    const [selectedChat, setSelectedChat] = useState();
+  const [myChats, setMyChats] = useState([]);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-  // console.log(user.token);
+//   console.log(user.token);
 
   const findUsers = async (search) => {
-    const result = await axios.get(`/api/user/search?search=${search}`, {
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-      },
-    });
-    setFoundUsers(result.data);
+    try {
+      setLoadingUsers(true);
+      const result = await axios.get(`/api/user/search?search=${search}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      setFoundUsers(result.data);
+      setLoadingUsers(false);
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: error.response.data.message,
+        status: "error",
+      });
+    }
   };
 
   useEffect(() => {
@@ -73,6 +81,35 @@ const SideDrawer = () => {
     localStorage.removeItem("userInfo");
     navigate("/home");
   };
+
+  const accessChat = async (secondUser) => {
+    try {
+      setLoadingChat(true);
+
+      const result = await axios.post(`/api/chat`, secondUser, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(result.data);
+
+      if (!myChats.find((chat) => chat._id === result.data._id)) {
+        setMyChats([result.data, ...myChats]);
+      }
+      setSelectedChat(result.data);
+
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        description: error.message,
+        status: "error",
+      });
+    } finally {
+      setLoadingChat(false);
+    }
+  };
+
   return (
     <>
       <Box
@@ -85,14 +122,12 @@ const SideDrawer = () => {
         p="5px 10px 5px 10px"
         borderWidth="5px"
       >
-        <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
-          <Button variant="ghost" onClick={onOpen}>
-            <FaSearch />
-            <Text display={{ base: "none", md: "flex" }} px={3}>
-              Search User
-            </Text>
-          </Button>
-        </Tooltip>
+        <Button variant="ghost" onClick={onOpen}>
+          <FaSearch />
+          <Text display={{ base: "none", md: "flex" }} px={3}>
+            Search User
+          </Text>
+        </Button>
 
         <Text fontSize="2xl" fontFamily="Work sans">
           ChatterBox...
@@ -114,7 +149,7 @@ const SideDrawer = () => {
 
           <Menu>
             <MenuButton>
-              <Avatar size="sm" name="Dan Abrahmov" />
+              <Avatar size="sm" name={user.name} src={user.picture} />
             </MenuButton>
             <MenuList>
               <ProfileModal user={user}>
@@ -129,7 +164,6 @@ const SideDrawer = () => {
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerCloseButton />
           <DrawerHeader>Search User</DrawerHeader>
 
           <DrawerBody>
@@ -138,16 +172,22 @@ const SideDrawer = () => {
               onChange={(e) => {
                 setSearch(e.target.value);
               }}
+              mb="1rem"
             />
-            <Table size="sm" mt="10px">
-              <Tbody >
-                {foundUsers.map((user) => (
-                  <Tr key={user._id}>
-                    <Td>{user.name}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+
+            {loadingUsers ? (
+              <ChatsLoading />
+            ) : (
+              foundUsers.map((user) => (
+                <UserListItem
+                  user={user}
+                  handleFunction={() => {
+                    accessChat(user);
+                  }}
+                  key={user._id}
+                />
+              ))
+            )}
           </DrawerBody>
 
           <DrawerFooter
@@ -159,7 +199,6 @@ const SideDrawer = () => {
             <Button colorScheme="red" onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="facebook">Save</Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

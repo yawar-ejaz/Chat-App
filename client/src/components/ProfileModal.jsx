@@ -54,9 +54,7 @@ const ProfileModal = ({ user, children }) => {
               src={user.picture}
               alt="image unailible"
             />
-            <Text
-            //   fontSize={{ base: "28px", md: "30px" }}
-            >
+            <Text>
               Email: {user.email}
             </Text>
           </ModalBody>
