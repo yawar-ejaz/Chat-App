@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProfileModal from "./ProfileModal";
 import ChatsLoading from "./ChatsLoading";
 import UserListItem from "./UserListItem";
 import { FaSearch } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import useAuthContext from "../hooks/useAuthContext";
+import { ACTIONS } from "../contexts/authContext";
 import axios from "axios";
 
 import {
@@ -37,6 +39,7 @@ import { Text } from "@chakra-ui/layout";
 
 const SideDrawer = () => {
   const toast = useToast();
+  const { user, dispatch } = useAuthContext();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -44,11 +47,8 @@ const SideDrawer = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
   const [foundUsers, setFoundUsers] = useState([]);
-    const [selectedChat, setSelectedChat] = useState();
+  const [selectedChat, setSelectedChat] = useState();
   const [myChats, setMyChats] = useState([]);
-
-  const user = JSON.parse(localStorage.getItem("userInfo"));
-//   console.log(user.token);
 
   const findUsers = async (search) => {
     try {
@@ -78,7 +78,9 @@ const SideDrawer = () => {
   }, [search]);
 
   const logoutUser = () => {
-    localStorage.removeItem("userInfo");
+    dispatch({
+      type: ACTIONS.LOGOUT,
+    });
     navigate("/home");
   };
 
@@ -149,7 +151,7 @@ const SideDrawer = () => {
 
           <Menu>
             <MenuButton>
-              <Avatar size="sm" name={user.name} src={user.picture} />
+              <Avatar size="sm" name={user?.name} src={user?.picture} />
             </MenuButton>
             <MenuList>
               <ProfileModal user={user}>

@@ -5,6 +5,8 @@ const cloudinary = require("cloudinary");
 
 const User = require('../models/user');
 const generateToken = require('../utils/generateToken');
+const getDataUri = require("../utils/dataParser");
+const { encrypt, isMatching } = require("../utils/hashing");
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,14 +14,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage }).single("image");
-
 const createUser = async (req, res, next) => {
-    const { name, email, password, pic } = req.body;
-    console.log(name);
-    console.log(pic);
-    return;
+    const { name, email, password } = req.body;
+
     try {
         const existingUser = await User.findOne({
             where: { email: email }
@@ -32,46 +29,19 @@ const createUser = async (req, res, next) => {
             })
         }
 
-        upload(req, res, async (err) => {
-            if (err instanceof multer.MulterError) {
-                return res.status(400).json({ error: err.message });
-            }
-            else if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-        });
-        // await new Promise((resolve, reject) => {
-        //     upload(req, res, async (err) => {
-        //         if (err) {
-        //             return reject(err);
-        //         }
-        //         resolve();
-        //     });
-        // });
-
-        const result = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                { folder: "uploads" },
-                (error, result) => {
-                    if (error) reject(error)
-                    else resolve(result)
-                }
-            )
-
-            if (pic && pic.buffer) {
-                stream.write(pic.buffer);  // Assuming pic is a Multer file object
-                stream.end();
-            }
-            else {
-                reject(new Error("No file found"));
-            }
-        });
+        let picture;
+        if (req.file) {
+            const fileUri = getDataUri(req.file);
+            picture = await cloudinary.uploader.upload(fileUri.content, {
+                folder: "uploads",
+            });
+        } 
 
         const user = await User.create({
             name,
             email,
             password: await encrypt(password),
-            picture: result.secure_url
+            picture: picture.secure_url
         });
 
         res.status(201).json({
@@ -86,7 +56,7 @@ const createUser = async (req, res, next) => {
         console.log(error);
         res.status(500).json({
             success: false,
-            message: "Internal server error"
+            message: "Error creating user or uploading image"
         });
     }
 };

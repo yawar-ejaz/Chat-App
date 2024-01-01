@@ -7,30 +7,37 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { IconButton } from "@chakra-ui/react";
+import { BiSolidShow, BiSolidHide } from "react-icons/bi";
+import useAuthContext from "../hooks/useAuthContext";
+import { ACTIONS } from "../contexts/authContext";
 
 const SignIn = () => {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const { reset, register, handleSubmit } = useForm();
+  const { dispatch } = useAuthContext();
 
   const navigate = useNavigate();
-  //   const { setUser } = ChatState();
 
   const submitHandler = async (data) => {
     setLoading(true);
     try {
       const result = await axios.post("/api/user/sign-in", data);
-    //   toast({
-    //     title: "Login successful",
-    //     status: "success",
-    //   });
+
       const user = {
         name: result.data?.name,
         email: result.data?.email,
         picture: result.data?.picture,
         token: result.data?.token,
       };
+
+      dispatch({
+        type: ACTIONS.LOGIN,
+        payload: user,
+      });
+
       localStorage.setItem("userInfo", JSON.stringify(user));
       navigate("/chats");
     } catch (error) {
@@ -46,8 +53,8 @@ const SignIn = () => {
   };
 
   return (
-    <VStack spacing="20px">
-      <form onSubmit={handleSubmit(submitHandler)}>
+    <form onSubmit={handleSubmit(submitHandler)}>
+      <VStack spacing="20px">
         <FormControl isRequired>
           <FormLabel>Email</FormLabel>
           <Input type="email" {...register("email")} />
@@ -60,10 +67,11 @@ const SignIn = () => {
               type={show ? "text" : "password"}
               {...register("password")}
             />
-            <InputRightElement width="4.5rem">
-              <Button h="1.75rem" size="sm" onClick={() => setShow(!show)}>
-                {show ? "Hide" : "Show"}
-              </Button>
+            <InputRightElement h={"full"}>
+              <IconButton
+                icon={show ? <BiSolidHide /> : <BiSolidShow />}
+                onClick={() => setShow(!show)}
+              />
             </InputRightElement>
           </InputGroup>
         </FormControl>
@@ -76,8 +84,8 @@ const SignIn = () => {
         >
           Login
         </Button>
-      </form>
-    </VStack>
+      </VStack>
+    </form>
   );
 };
 

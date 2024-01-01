@@ -7,29 +7,31 @@ import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { IconButton } from "@chakra-ui/react";
+import { BiSolidShow, BiSolidHide } from "react-icons/bi";
+import useAuthContext from "../hooks/useAuthContext";
+import { ACTIONS } from "../contexts/authContext";
 
 const SignUp = () => {
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
   const toast = useToast();
 
   const { reset, register, handleSubmit } = useForm();
+  const { dispatch } = useAuthContext();
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
-    data.pic = data.pic[0];
-    if (data.pic === undefined) {
-      data.pic = `https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg`;
-    }
-    console.log(data);
-
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    formData.append("pic", data.pic);
-    console.log(formData);
-
+    setLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      if (data.pic) {
+        formData.append("pic", data.pic[0]);
+      }
+
       const result = await axios.post("/api/user/sign-up", formData);
       const user = {
         name: result.data?.name,
@@ -37,21 +39,29 @@ const SignUp = () => {
         picture: result.data?.picture,
         token: result.data?.token,
       };
+
+      dispatch({
+        type: ACTIONS.LOGIN,
+        payload: user,
+      });
+
       localStorage.setItem("userInfo", JSON.stringify(user));
       navigate("/chats");
     } catch (error) {
       toast({
         title: "Error Occured!",
-        description: error.response.data.message,
+        description: error.response?.data?.message || "Internal server error!",
         status: "error",
       });
       reset();
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <VStack spacing="6px">
-      <form onSubmit={handleSubmit(submitHandler)}>
+    <form onSubmit={handleSubmit(submitHandler)}>
+      <VStack spacing="6px">
         <FormControl isRequired>
           <FormLabel>Name and Email</FormLabel>
           <Input
@@ -77,10 +87,11 @@ const SignUp = () => {
               placeholder="Enter Password"
               {...register(`password`)}
             />
-            <InputRightElement width="4.5rem">
-              <Button h="1.75rem" size="sm" onClick={() => setShow(!show)}>
-                {show ? "Hide" : "Show"}
-              </Button>
+            <InputRightElement h={"full"}>
+              <IconButton
+                icon={show ? <BiSolidHide /> : <BiSolidShow />}
+                onClick={() => setShow(!show)}
+              />
             </InputRightElement>
           </InputGroup>
         </FormControl>
@@ -95,11 +106,12 @@ const SignUp = () => {
           width="100%"
           style={{ marginTop: 15 }}
           type="submit"
+          isLoading={loading}
         >
           Sign Up
         </Button>
-      </form>
-    </VStack>
+      </VStack>
+    </form>
   );
 };
 
