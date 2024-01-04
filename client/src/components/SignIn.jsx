@@ -57,7 +57,7 @@ const SignIn = () => {
       <VStack spacing="20px">
         <FormControl isRequired>
           <FormLabel>Email</FormLabel>
-          <Input type="email" {...register("email")} />
+          <Input type="email" autoComplete="off" {...register("email")} />
         </FormControl>
 
         <FormControl isRequired>
@@ -65,6 +65,7 @@ const SignIn = () => {
           <InputGroup size="md">
             <Input
               type={show ? "text" : "password"}
+              autoComplete="off"
               {...register("password")}
             />
             <InputRightElement h={"full"}>

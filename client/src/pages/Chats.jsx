@@ -9,7 +9,7 @@ const Chats = () => {
     <div
       style={{
         width: "100%",
-        height: "100vh",
+        height: "89vh",
       }}
     >
       <SideDrawer />
@@ -19,7 +19,7 @@ const Chats = () => {
         justifyContent="space-between"
         width="100%"
         height="100%"
-        backgroundColor="lightblue"
+        // backgroundColor="lightblue"
       >
         <MyChats />
         <ChatWindow />

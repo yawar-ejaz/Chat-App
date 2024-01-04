@@ -67,6 +67,7 @@ const SignUp = () => {
           <Input
             type="text"
             placeholder="Enter Your Name"
+            autoComplete="off"
             {...register(`name`)}
           />
         </FormControl>
@@ -75,6 +76,7 @@ const SignUp = () => {
           <Input
             type="email"
             placeholder="Enter Your Email Address"
+            autoComplete="off"
             {...register(`email`)}
           />
         </FormControl>
@@ -85,6 +87,7 @@ const SignUp = () => {
             <Input
               type={show ? "text" : "password"}
               placeholder="Enter Password"
+              autoComplete="off"
               {...register(`password`)}
             />
             <InputRightElement h={"full"}>

@@ -17,7 +17,6 @@ const ACTIONS = {
 
 const authReducer = (state, action) => {
   if (action.type === ACTIONS.LOGIN) {
-    console.log("user context created");
     return { user: action.payload };
   } else if (action.type === ACTIONS.LOGOUT) {
     localStorage.removeItem("userInfo");
