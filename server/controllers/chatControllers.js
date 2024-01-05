@@ -1,11 +1,19 @@
+require('dotenv').config();
 const sequelize = require("../utils/database");
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const { Op } = require("sequelize");
+const getDataUri = require("../utils/dataParser");
+const cloudinary = require("cloudinary");
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const fetchUserChat = async (req, res, next) => {
     const userId = req.body._id;
-    // res.send([userId, req.user._id])
 
     if (!userId) {
         return res.status(400).json({
@@ -67,32 +75,70 @@ const fetchUserChat = async (req, res, next) => {
             message: error.message,
         });
     }
-
-    
 }
 
 const fetchChats = async (req, res, next) => {
-    // try {
-    //     const userChats = await Chat.findAll({
-    //         include: [
-    //             {
-    //                 model: User,
-    //                 as: "users",
-    //                 attributes: [_id],
-    //                 through: { attributes: [] },
-    //             },
-    //         ],
-    //         order: [["updatedAt", "DESC"]],
-    //     });
-    //     res.json(userChats);
-    // } catch (error) {
-    //     console.log(error);
-    //     return res.status(500).json({
-    //         success: false,
-    //         message: error.message,
-    //     });
-    // }
     res.send("my chats here");
 };
 
-module.exports = { fetchUserChat, fetchChats };
+const createGroup = async (req, res, next) => {
+    const { groupName, users } = req.body;
+
+    if (!groupName || !users) {
+        return res.status(400).json({
+            success: false,
+            message: "Please fill all the fields!",
+        });
+    }
+
+    if (users.length < 2) {
+        return res.status(400).json({
+            success: false,
+            message: "More than 2 users are required to form a group chat",
+        });
+    }
+    users.push(req.user._id);
+    // console.log(users);
+    const t = await sequelize.transaction();
+    try {
+        let picture;
+        if (req.file) {
+            const fileUri = getDataUri(req.file);
+            picture = await cloudinary.uploader.upload(fileUri.content, {
+                folder: "uploads",
+            });
+        }
+        console.log(picture);
+
+        const newChat = await Chat.create(
+            {
+                chatName: groupName,
+                isGroupChat: true,
+                groupAdminId: req.user._id,
+                groupPic: picture.secure_url
+            },
+            { transaction: t }
+        );
+
+        const chatInstance = await Chat.findByPk(newChat._id, {
+            transaction: t,
+        });
+
+        await chatInstance.addUsers(users, { transaction: t });
+
+        await t.commit();
+        res.status(200).json({
+            success: true,
+            message: "Group created successfully",
+        });
+    } catch (error) {
+        console.log(error);
+        await t.rollback();
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+module.exports = { fetchUserChat, fetchChats, createGroup };

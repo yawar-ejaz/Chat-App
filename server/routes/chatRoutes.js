@@ -1,10 +1,14 @@
 const express = require(`express`);
-const { fetchUserChat, fetchChats } = require('../controllers/chatControllers')
+const { fetchUserChat, fetchChats, createGroup } = require('../controllers/chatControllers')
 const auth = require('../middlewares/auth');
+const upload = require("../middlewares/multer");
+
 
 const router = express.Router();
 
 router.route('/').post(auth, fetchUserChat);
 router.route('/all-chats').get(auth, fetchChats);
+router.route('/create-group').post(auth, upload, createGroup);
+
 
 module.exports = router;

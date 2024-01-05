@@ -80,6 +80,37 @@ const GroupModal = () => {
     setSelectedUsers(updatedUsers);
   };
 
+  const submitHandler = async (data) => {
+    // setLoading(true);
+    const users = selectedUsers.map((user) => user._id);
+    try {
+      const formData = new FormData();
+      formData.append("groupName", data.groupName);
+      formData.append("users", users);
+      if (data.groupPic) {
+        formData.append("pic", data.groupPic[0]);
+      }
+
+      const result = await axios.post("/api/chat/create-group", formData, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      console.log(result);
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: error.response?.data?.message || "Internal server error",
+        status: "error",
+      });
+    } finally {
+      reset();
+      setSelectedUsers([]);
+      onClose();
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Button colorScheme="green" size="sm" variant="solid" onClick={onOpen}>
@@ -108,7 +139,7 @@ const GroupModal = () => {
             alignItems="center"
             justifyContent="space-between"
           >
-            <form onSubmit={() => {}}>
+            <form onSubmit={handleSubmit(submitHandler)}>
               <VStack spacing="10px">
                 <FormControl isRequired>
                   <Input
@@ -137,6 +168,7 @@ const GroupModal = () => {
                       setSearch(e.target.value);
                     }}
                   />
+
                   {search && (
                     <Box
                       width="100%"
@@ -147,6 +179,7 @@ const GroupModal = () => {
                       border="2px solid black"
                       position="absolute"
                       top="42px"
+                      backgroundColor="white"
                       zIndex={1}
                     >
                       {loading ? (
@@ -164,6 +197,7 @@ const GroupModal = () => {
                       )}
                     </Box>
                   )}
+
                   {selectedUsers && (
                     <Box
                       width="100%"
@@ -178,20 +212,25 @@ const GroupModal = () => {
                       {selectedUsers.map((user) => (
                         <Tag
                           size="lg"
-                          colorScheme="red"
+                          colorScheme="blue"
                           borderRadius="full"
                           key={user._id}
+                          py={1}
+                          margin={1}
                         >
                           <Avatar
                             src={user.picture}
                             size="sm"
                             name={user.name}
-                            mt={1}
+                            mr={2}
                           />
                           <TagLabel>{user.name}</TagLabel>
-                          <TagCloseButton onClick={()=>{removeUser(user)}}/>
+                          <TagCloseButton
+                            onClick={() => {
+                              removeUser(user);
+                            }}
+                          />
                         </Tag>
-                        //    console.log(user)
                       ))}
                     </Box>
                   )}
@@ -202,7 +241,9 @@ const GroupModal = () => {
                     gap={2}
                     mt={5}
                     position="absolute"
+                    width="100%"
                     top="250px"
+                    justifyContent="center"
                   >
                     <Button
                       colorScheme="facebook"

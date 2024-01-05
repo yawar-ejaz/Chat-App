@@ -1,8 +1,6 @@
 require('dotenv').config();
 const { Op } = require("sequelize");
-const multer = require("multer");
 const cloudinary = require("cloudinary");
-
 const User = require('../models/user');
 const generateToken = require('../utils/generateToken');
 const getDataUri = require("../utils/dataParser");
@@ -35,7 +33,7 @@ const createUser = async (req, res, next) => {
             picture = await cloudinary.uploader.upload(fileUri.content, {
                 folder: "uploads",
             });
-        } 
+        }
 
         const user = await User.create({
             name,
