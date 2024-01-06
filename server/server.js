@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 const sequelize = require('./utils/database');
 const User = require('./models/user');
 const Chat = require('./models/chat');
@@ -18,6 +19,7 @@ app.use(cors({
 
 app.use("/api/user/", userRoutes);
 app.use(`/api/chat/`, chatRoutes);
+app.use(`/api/message/`, messageRoutes);
 
 Chat.hasMany(Message, {
     onDelete: "CASCADE",

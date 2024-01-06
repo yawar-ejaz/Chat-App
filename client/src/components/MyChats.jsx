@@ -2,38 +2,35 @@ import { VStack, Text } from "@chakra-ui/react";
 import { Avatar } from "@chakra-ui/avatar";
 import React, { useEffect, useState } from "react";
 import useAuthContext from "../hooks/useAuthContext";
+import useChatContext from "../hooks/useChatContext";
 import axios from "axios";
-import {
-  Box,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 import GroupModal from "./GroupModal";
 
 const MyChats = () => {
   const { user } = useAuthContext();
+  const { setSelectedChatId, selectedChatId } = useChatContext();
   const toast = useToast();
-    const [chatList, setChatList] = useState([]);
+  const [chatList, setChatList] = useState([]);
 
-
-    useEffect(() => {
-        (async () => {
-            try {
-              const myChats = await axios.get("/api/chat", {
-                headers: {
-                  Authorization: `Bearer ${user.token}`,
-                },
-              });
-              setChatList(myChats.data);
-            } catch (error) {
-              toast({
-                title: "Error fetching the chat",
-                description: error.response?.data?.message || "Internal server error",
-                status: "error",
-              });
-            }
-        })()
-    }, [])
+  useEffect(() => {
+    (async () => {
+      try {
+        const myChats = await axios.get("/api/chat", {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+        setChatList(myChats.data);
+      } catch (error) {
+        toast({
+          title: "Error fetching the chat",
+          description: error.response?.data?.message || "Internal server error",
+          status: "error",
+        });
+      }
+    })();
+  }, []);
 
   return (
     <>
@@ -54,13 +51,13 @@ const MyChats = () => {
           <GroupModal />
         </Box>
 
-        <VStack align="start" spacing="2" mt={3}>
-          {chatList.map((chat, index) => (
+        <VStack align="start" spacing="1" mt={3}>
+          {chatList.map((chat) => (
             <Box
-              key={index}
-              onClick={() => {}}
+              key={chat._id}
+              onClick={() => setSelectedChatId(chat._id)}
               cursor="pointer"
-              bg="white"
+              bg={selectedChatId === chat._id ? "lightgreen" : "white"}
               _hover={{
                 background: "#4267B2 ",
                 color: "white",

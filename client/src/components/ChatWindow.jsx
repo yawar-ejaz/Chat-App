@@ -1,11 +1,10 @@
-import React from 'react'
+import React from "react";
+import useChatContext from "../hooks/useChatContext";
+import FullChat from "./FullChat";
 
 const ChatWindow = () => {
-  return (
-    <>
-      Chat Window
-    </>
-  )
-}
+  const { selectedChatId } = useChatContext();
+  return <>{!selectedChatId ? <h1>No chat </h1> : <FullChat/>}</>;
+};
 
-export default ChatWindow
+export default ChatWindow;
