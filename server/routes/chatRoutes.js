@@ -6,8 +6,8 @@ const upload = require("../middlewares/multer");
 
 const router = express.Router();
 
-router.route('/').post(auth, fetchUserChat);
-router.route('/all-chats').get(auth, fetchChats);
+// router.route('/').post(auth, fetchUserChat);
+router.route('/').get(auth, fetchChats);
 router.route('/create-group').post(auth, upload, createGroup);
 
 

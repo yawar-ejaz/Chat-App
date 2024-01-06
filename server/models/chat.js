@@ -15,7 +15,7 @@ const Chat = sequelize.define('chat', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
-    groupPic: {
+    picture: {
         type: DataTypes.STRING,
         defaultValue: "https://icon-library.com/images/group-icon-png/group-icon-png-23.jpg"
     }

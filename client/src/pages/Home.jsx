@@ -1,6 +1,5 @@
 import {
   Box,
-  Center,
   Container,
   Tab,
   TabList,

@@ -78,7 +78,29 @@ const fetchUserChat = async (req, res, next) => {
 }
 
 const fetchChats = async (req, res, next) => {
-    res.send("my chats here");
+    try {
+        const userChats = await Chat.findAll({
+            include: [
+                {
+                    model: User,
+                    as: "users",
+                    attributes: [],
+                    where: {
+                        _id: req.user._id,
+                    },
+                    through: { attributes: [] },
+                },
+            ],
+            order: [["updatedAt", "DESC"]],
+        });
+        res.json(userChats);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };
 
 const createGroup = async (req, res, next) => {
@@ -90,32 +112,34 @@ const createGroup = async (req, res, next) => {
             message: "Please fill all the fields!",
         });
     }
+    usersArr = users.split(",");
 
-    if (users.length < 2) {
+    if (usersArr.length < 2) {
         return res.status(400).json({
             success: false,
             message: "More than 2 users are required to form a group chat",
         });
     }
-    users.push(req.user._id);
-    // console.log(users);
+
+    usersArr.push(req.user._id);
     const t = await sequelize.transaction();
+
     try {
         let picture;
         if (req.file) {
+            console.log(req.file);
             const fileUri = getDataUri(req.file);
             picture = await cloudinary.uploader.upload(fileUri.content, {
                 folder: "uploads",
             });
         }
-        console.log(picture);
 
         const newChat = await Chat.create(
             {
                 chatName: groupName,
                 isGroupChat: true,
                 groupAdminId: req.user._id,
-                groupPic: picture.secure_url
+                picture: picture.secure_url
             },
             { transaction: t }
         );
@@ -124,7 +148,7 @@ const createGroup = async (req, res, next) => {
             transaction: t,
         });
 
-        await chatInstance.addUsers(users, { transaction: t });
+        await chatInstance.addUsers(usersArr, { transaction: t });
 
         await t.commit();
         res.status(200).json({

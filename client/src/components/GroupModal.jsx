@@ -81,7 +81,7 @@ const GroupModal = () => {
   };
 
   const submitHandler = async (data) => {
-    // setLoading(true);
+    setLoading(true);
     const users = selectedUsers.map((user) => user._id);
     try {
       const formData = new FormData();
