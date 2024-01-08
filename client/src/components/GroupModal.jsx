@@ -1,45 +1,37 @@
+import { Avatar } from "@chakra-ui/avatar";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Box,
   Button,
-  useDisclosure,
-  IconButton,
-  Text,
-  Image,
-  VStack,
   FormControl,
   FormLabel,
   Input,
-  useToast,
-  Box,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Tag,
-  TagLabel,
-  TagLeftIcon,
-  TagRightIcon,
   TagCloseButton,
+  TagLabel,
+  VStack,
+  useDisclosure,
+  useToast,
+  Divider,
 } from "@chakra-ui/react";
-import { Avatar } from "@chakra-ui/avatar";
-
 import axios from "axios";
-import useAuthContext from "../hooks/useAuthContext";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import useAuthContext from "../hooks/useAuthContext";
 import UserListItem from "./UserListItem";
 
 const GroupModal = () => {
   const toast = useToast();
   const { user } = useAuthContext();
-
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [foundUsers, setFoundUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-
   const { reset, register, handleSubmit } = useForm();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -55,7 +47,7 @@ const GroupModal = () => {
     } catch (error) {
       toast({
         title: "Error Occured!",
-        description: error.message,
+        description: error.response?.data?.message || "Internal server error",
         status: "error",
       });
     } finally {
@@ -116,29 +108,14 @@ const GroupModal = () => {
       <Button colorScheme="green" size="sm" variant="solid" onClick={onOpen}>
         + Group
       </Button>
-      <Modal size="lg" onClose={onClose} isOpen={isOpen} isCentered>
+      <Modal size="lg" onClose={onClose} isOpen={isOpen}>
         <ModalOverlay />
-        <ModalContent
-          h="540px"
-          display="flex"
-          flexDirection="column"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <ModalHeader
-            fontSize="20px"
-            fontFamily="Work sans"
-            d="flex"
-            justifyContent="center"
-          >
+        <ModalContent>
+          <ModalHeader fontFamily="Work sans" textAlign={"center"}>
             Create Group
           </ModalHeader>
-          <ModalBody
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Divider />
+          <ModalBody py={4}>
             <form onSubmit={handleSubmit(submitHandler)}>
               <VStack spacing="10px">
                 <FormControl isRequired>
@@ -149,7 +126,6 @@ const GroupModal = () => {
                     {...register("groupName")}
                   />
                 </FormControl>
-
                 <FormControl>
                   <FormLabel>Group picture</FormLabel>
                   <Input
@@ -160,31 +136,29 @@ const GroupModal = () => {
                     {...register(`groupPic`)}
                   />
                 </FormControl>
-
                 <Box position="relative" width="100%">
                   <Input
                     placeholder="Search users..."
+                    value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
                     }}
                   />
-
                   {search && (
                     <Box
                       width="100%"
-                      height="200px"
+                      maxH={"200px"}
                       color="black"
                       padding="4"
                       overflowY="auto"
-                      border="2px solid black"
+                      rounded={"md"}
+                      boxShadow={"lg"}
                       position="absolute"
                       top="42px"
                       backgroundColor="white"
                       zIndex={1}
                     >
-                      {loading ? (
-                        <></>
-                      ) : (
+                      {!loading &&
                         foundUsers.map((user) => (
                           <UserListItem
                             user={user}
@@ -193,21 +167,16 @@ const GroupModal = () => {
                             }}
                             key={user._id}
                           />
-                        ))
-                      )}
+                        ))}
                     </Box>
                   )}
-
-                  {selectedUsers && (
+                  {selectedUsers.length > 0 && (
                     <Box
                       width="100%"
-                      height="200px"
                       color="black"
                       padding="4"
+                      height="100px"
                       overflowY="auto"
-                      position="absolute"
-                      top="42px"
-                      zIndex={0}
                     >
                       {selectedUsers.map((user) => (
                         <Tag
@@ -234,17 +203,7 @@ const GroupModal = () => {
                       ))}
                     </Box>
                   )}
-
-                  <Box
-                    display="flex"
-                    flexDirection="row"
-                    gap={2}
-                    mt={5}
-                    position="absolute"
-                    width="100%"
-                    top="250px"
-                    justifyContent="center"
-                  >
+                  <ModalFooter dir="flex" justifyContent={"center"} gap={2}>
                     <Button
                       colorScheme="facebook"
                       type="submit"
@@ -261,7 +220,7 @@ const GroupModal = () => {
                     >
                       Close
                     </Button>
-                  </Box>
+                  </ModalFooter>
                 </Box>
               </VStack>
             </form>

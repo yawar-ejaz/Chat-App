@@ -1,30 +1,20 @@
 import { useState } from "react";
 import ChatWindow from "../components/ChatWindow";
 import MyChats from "../components/MyChats";
-import SideDrawer from "../components/SideDrawer";
+import Navbar from "../components/Navbar";
 import { Box, Flex, Link, Spacer, Text } from "@chakra-ui/react";
 
 const Chats = () => {
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "89vh",
-      }}
-    >
-      <SideDrawer />
-      <Box
-        display="flex"
-        flexDirection="row"
-        justifyContent="space-between"
-        width="100%"
-        height="100%"
-        // backgroundColor="lightblue"
-      >
+    <main className="h-[100dvh] ">
+      <section className="h-full fixed inset-y-0 w-80 border-r">
         <MyChats />
-        <ChatWindow />
-      </Box>
-    </div>
+      </section>
+      <section className="h-full ml-80 w-full">
+              <ChatWindow />
+              <p className="text-xl">jdshoadf34</p>
+      </section>
+    </main>
   );
 };
 

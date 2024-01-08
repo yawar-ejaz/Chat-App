@@ -39,12 +39,13 @@ const createUser = async (req, res, next) => {
             name,
             email,
             password: await encrypt(password),
-            picture: picture.secure_url
+            picture: picture?.secure_url || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
         });
 
         res.status(201).json({
             success: true,
             token: generateToken(user._id),
+            _id: user._id,
             name: user.name,
             email: user.email,
             picture: user.picture,
@@ -78,6 +79,7 @@ const loginUser = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 token: generateToken(existingUser._id),
+                _id: existingUser._id,
                 name: existingUser.name,
                 email: existingUser.email,
                 picture: existingUser.picture,
@@ -91,6 +93,7 @@ const loginUser = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Internal server error"

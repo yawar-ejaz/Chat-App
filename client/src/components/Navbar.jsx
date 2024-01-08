@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import ProfileModal from "./ProfileModal";
 import ChatsLoading from "./ChatsLoading";
 import UserListItem from "./UserListItem";
-import { FaSearch } from "react-icons/fa";
 import { IoIosNotifications } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useAuthContext from "../hooks/useAuthContext";
@@ -12,32 +11,24 @@ import axios from "axios";
 import {
   Box,
   Button,
-  Tooltip,
   Menu,
   Input,
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
   Avatar,
   useDisclosure,
-  AvatarBadge,
-  AvatarGroup,
   Drawer,
   DrawerBody,
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
-  DrawerCloseButton,
   useToast,
 } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/layout";
 
-const SideDrawer = () => {
+const Navbar = () => {
   const toast = useToast();
   const { user, dispatch } = useAuthContext();
   const navigate = useNavigate();
@@ -124,12 +115,12 @@ const SideDrawer = () => {
         p="5px 10px 5px 10px"
         borderWidth="5px"
       >
-        <Button variant="ghost" onClick={onOpen}>
+        {/* <Button variant="ghost" onClick={onOpen}>
           <FaSearch />
           <Text display={{ base: "none", md: "flex" }} px={3}>
             Search User
           </Text>
-        </Button>
+        </Button> */}
 
         <Text fontSize="2xl" fontFamily="Work sans">
           ChatterBox...
@@ -208,4 +199,4 @@ const SideDrawer = () => {
   );
 };
 
-export default SideDrawer;
+export default Navbar;

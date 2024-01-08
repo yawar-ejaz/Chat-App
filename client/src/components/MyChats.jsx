@@ -39,7 +39,7 @@ const MyChats = () => {
         color="black"
         padding="4"
         overflowY="auto"
-        border="1px solid black"
+        // border="1px solid black"
       >
         <Box
           display="flex"

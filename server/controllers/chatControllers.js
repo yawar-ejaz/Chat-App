@@ -2,6 +2,7 @@ require('dotenv').config();
 const sequelize = require("../utils/database");
 const Chat = require('../models/chat');
 const User = require('../models/user');
+const Message = require('../models/message');
 const { Op } = require("sequelize");
 const getDataUri = require("../utils/dataParser");
 const cloudinary = require("cloudinary");
@@ -139,7 +140,7 @@ const createGroup = async (req, res, next) => {
                 chatName: groupName,
                 isGroupChat: true,
                 groupAdminId: req.user._id,
-                picture: picture.secure_url
+                picture: picture?.secure_url || "https://icon-library.com/images/group-icon-png/group-icon-png-23.jpg"
             },
             { transaction: t }
         );
@@ -165,4 +166,46 @@ const createGroup = async (req, res, next) => {
     }
 }
 
-module.exports = { fetchUserChat, fetchChats, createGroup };
+const allMessages = async (req, res, next) => {
+    const chatId = req.params.chatId;
+
+    try {
+        const messages = await Chat.findByPk(chatId, {
+            include: [
+                {
+                    model: User,
+                    as: "users",
+                    attributes: ["name", "picture", "email"],
+                },
+                {
+                    model: Message,
+                    include: [
+                        {
+                            model: User,
+                            as: "sender",
+                            attributes: ["name", "picture", "email"],
+                        }
+                    ],
+                    order: [["createdAt", "DESC"]]
+                }
+            ],
+        });
+
+        if (!messages) {
+            return res.status(404).json({
+                success: false,
+                message: "No message found for given chat Id!",
+            });
+        }
+
+        res.json(messages);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+module.exports = { fetchUserChat, fetchChats, createGroup, allMessages };

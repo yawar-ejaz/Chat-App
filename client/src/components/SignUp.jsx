@@ -6,7 +6,6 @@ import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { IconButton } from "@chakra-ui/react";
 import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 import useAuthContext from "../hooks/useAuthContext";
@@ -19,7 +18,6 @@ const SignUp = () => {
 
   const { reset, register, handleSubmit } = useForm();
   const { dispatch } = useAuthContext();
-  const navigate = useNavigate();
 
   const submitHandler = async (data) => {
     setLoading(true);
@@ -33,20 +31,19 @@ const SignUp = () => {
       }
 
       const result = await axios.post("/api/user/sign-up", formData);
-      const user = {
-        name: result.data?.name,
-        email: result.data?.email,
-        picture: result.data?.picture,
-        token: result.data?.token,
-      };
+        const user = {
+          _id: result.data?._id,
+          name: result.data?.name,
+          email: result.data?.email,
+          picture: result.data?.picture,
+          token: result.data?.token,
+        };
 
-      dispatch({
-        type: ACTIONS.LOGIN,
-        payload: user,
-      });
+        dispatch({
+          type: ACTIONS.LOGIN,
+          payload: user,
+        });
 
-      localStorage.setItem("userInfo", JSON.stringify(user));
-      navigate("/chats");
     } catch (error) {
       toast({
         title: "Error Occured!",

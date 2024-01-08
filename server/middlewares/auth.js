@@ -28,7 +28,7 @@ const requireAuth = async (req, res, next) => {
         //if token is invalid
         res.status(401).json({
             success: false,
-            message: "Internal server error"
+            message: "Invalid token"
         });
     }
 };
