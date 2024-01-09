@@ -1,31 +1,32 @@
+import { FormControl } from "@chakra-ui/form-control";
 import {
-  Box,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
   useToast,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import Message from "./Message";
-import { FormControl, FormLabel } from "@chakra-ui/form-control";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoSend } from "react-icons/io5";
-import useChatContext from "../hooks/useChatContext";
 import useAuthContext from "../hooks/useAuthContext";
-import axios from "axios";
+import useChatContext from "../hooks/useChatContext";
+import Message from "./Message";
 
 const Messages = ({ msgs }) => {
   const { user } = useAuthContext();
-  const [messages, setMessages] = useState(null);
-  const { setSelectedChatId, selectedChatId } = useChatContext();
-  const toast = useToast();
+  const { selectedChatId } = useChatContext();
+  const [messages, setMessages] = useState(msgs);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
   const { reset, register, handleSubmit } = useForm();
+  const scrollRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    setMessages(msgs);
-  }, [msgs]);
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const submitHandler = async (data) => {
     setLoading(true);
@@ -35,7 +36,6 @@ const Messages = ({ msgs }) => {
           Authorization: `Bearer ${user.token}`,
         },
       });
-      console.log(result.data);
       setMessages((prev) => [...prev, result.data]);
     } catch (error) {
       console.log(error);
@@ -51,25 +51,21 @@ const Messages = ({ msgs }) => {
   };
 
   return (
-    <Box display={"flex"} flex={1} flexDirection={"column"}>
-      <Box
-        flex={1}
-              display={"flex"}
-              flexDirection={"column"}
-        overflowY={"auto"}
-        border={"2px solid black"}
-      >
+    <div className="flex flex-col h-full">
+      <div className="flex-col overflow-y-auto h-full mt-[60px] mb-[100px] px-5">
         {messages?.map((message) => (
           <Message
             key={message._id}
             name={message.sender.name}
             message={message.content}
+            userEmail={message.sender.email}
           />
         ))}
-      </Box>
+        <div ref={scrollRef} />
+      </div>
       <form
         onSubmit={handleSubmit(submitHandler)}
-        style={{ padding: "1rem", width: "full", backgroundColor: "gray" }}
+        className="absolute block bottom-0 w-full p-4 bg-gray-400"
       >
         <FormControl isRequired isDisabled={loading}>
           <InputGroup size="md">
@@ -86,7 +82,7 @@ const Messages = ({ msgs }) => {
           </InputGroup>
         </FormControl>
       </form>
-    </Box>
+    </div>
   );
 };
 

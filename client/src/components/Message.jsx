@@ -1,54 +1,22 @@
+import { Text } from "@chakra-ui/react";
 import React from "react";
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Tag,
-  Text,
-  TagCloseButton,
-  TagLabel,
-  VStack,
-  useDisclosure,
-  useToast,
-  Divider,
-} from "@chakra-ui/react";
+import useAuthContext from "../hooks/useAuthContext";
 
-const Message = ({ name, message }) => {
+const Message = ({ name, message, userEmail }) => {
+  const {
+    user: { email },
+  } = useAuthContext();
+
   return (
-    <div style={styles.messageContainer}>
-      <Text fontSize="xs" as="b">{name}</Text>
-      <Text fontSize="xs">{message}</Text>
+    <div
+      className={`msg w-fit rounded-md p-2 ${
+        email === userEmail ? "sent" : "received"
+      }`}
+    >
+      <p className="font-semibold text-xs text-left">~{name}</p>
+      <h4 className="text-lg">{message}</h4>
     </div>
   );
 };
 
-const styles = {
-    messageContainer: {
-        float: "right",
-    maxWidth: "70%", // Adjust the width as needed
-    margin: "5px",
-    padding: "5px",
-    borderRadius: "8px",
-    backgroundColor: "#DCF8C6", // Adjust the background color as needed
-    alignSelf: "flex-start",
-  },
-  senderName: {
-    fontWeight: "bold",
-  },
-  message: {
-    wordWrap: "break-word",
-  },
-};
-
 export default Message;
-
-
-

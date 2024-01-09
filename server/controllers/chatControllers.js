@@ -170,6 +170,7 @@ const allMessages = async (req, res, next) => {
     const chatId = req.params.chatId;
 
     try {
+        const totalMessages = await Message.count({ where: { chatId } });
         const messages = await Chat.findByPk(chatId, {
             include: [
                 {
@@ -184,10 +185,13 @@ const allMessages = async (req, res, next) => {
                             model: User,
                             as: "sender",
                             attributes: ["name", "picture", "email"],
-                        }
+                        },
                     ],
-                    order: [["createdAt", "DESC"]]
-                }
+                    separate: true,
+                    order: [["createdAt", "ASC"]], // Sort in descending order
+                    limit: 10,
+                    offset: totalMessages > 10 ? totalMessages - 10 : 0
+                },
             ],
         });
 

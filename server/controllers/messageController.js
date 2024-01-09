@@ -1,8 +1,7 @@
-require('dotenv').config();
-const sequelize = require("../utils/database");
-const Chat = require('../models/chat');
-const User = require('../models/user');
-const Message = require('../models/message');
+require("dotenv").config();
+const Chat = require("../models/chat");
+const User = require("../models/user");
+const Message = require("../models/message");
 
 const sendMessage = async (req, res, next) => {
     const chatId = req.params.chatId;
